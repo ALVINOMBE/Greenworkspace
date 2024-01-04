@@ -1,42 +1,4 @@
-<?php
-require('cons.php');
-
-// Fetch data from the database
-$sql = "SELECT employee.name, employee.department, performance_ratings.efficiency, performance_ratings.profficiency 
-        FROM employee
-        JOIN performance_ratings ON employee.ratings_id = performance_ratings.ratings_id";
-
-$result = $conn->query($sql);
-
-if ($result) {
-  // Check if there are rows in the result
-  if ($result->num_rows > 0) {
-    // Fetch data and prepare for chart
-    $data = array();
-    while ($row = $result->fetch_assoc()) {
-      $data[] = array(
-        'name' => $row["name"],
-        'department' => $row["department"],
-        'efficiency' => $row["efficiency"],
-        'profficiency' => $row["profficiency"],
-        'ratings' => ($row["profficiency"] + $row["efficiency"] )/2,
-      );
-    }
-
-    // Close the database connection
-    $conn->close();
-
-    // Convert data to JSON for JavaScript
-    $jsonData = json_encode($data);
-  } else {
-    echo "0 results";
-  }
-} else {
-  echo "Error: " . $conn->error;
-}
-
-?>
-
+<?php require('query.php')?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,7 +37,7 @@ if ($result) {
 <body>
 
 <!-- Chart container -->
-<canvas id="performanceChart" width="1500" height="400"></canvas>
+<canvas id="performanceChart" width="1400" height="400"></canvas>
 
 <script>
 // Parse the JSON data
@@ -135,39 +97,12 @@ var performanceChart = new Chart(ctx, {
       }
     },
     animation: {
-      duration: 2000, // Animation duration in milliseconds
-      easing: 'easeInOutQuart', // Easing function for the animation
+      duration: 2000,
+      easing: 'easeInOutQuart', 
     }
   }
 });
 </script>
-
-<!-- Table for displaying query data -->
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Department</th>
-      <th>Efficiency</th>
-      <th>Profficiency</th>
-      <th>Ratings</th>
-    </tr>
-  </thead>
-  <tbody>
-    <?php
-    // Loop through the data to populate the table rows
-    foreach ($data as $item) {
-      echo "<tr>";
-      echo "<td>{$item['name']}</td>";
-      echo "<td>{$item['department']}</td>";
-      echo "<td>{$item['efficiency']}</td>";
-      echo "<td>{$item['profficiency']}</td>";
-      echo "<td>{$item['ratings']}</td>";
-      echo "</tr>";
-    }
-    ?>
-  </tbody>
-</table>
 
 </body>
 </html>
